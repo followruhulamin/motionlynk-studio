@@ -10,7 +10,6 @@ interface CategoryManagerProps {
   onClose: () => void
   onChanged: () => void
 }
-
 export default function CategoryManager({
   extensionPath,
   onClose,
@@ -26,6 +25,8 @@ export default function CategoryManager({
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const editInputRef = useRef<HTMLInputElement>(null)
+  const [draggedCategory, setDraggedCategory] = useState<string | null>(null)
+  const [dragOverCategory, setDragOverCategory] = useState<string | null>(null)
 
   const loadCategories = async () => {
     try {
@@ -38,6 +39,50 @@ export default function CategoryManager({
     } catch (err) {
       setError((err as Error).message)
     }
+  }
+
+  const handleDragStart = (e: React.DragEvent, catName: string) => {
+    setDraggedCategory(catName)
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', catName)
+  }
+
+  const handleDragOver = (e: React.DragEvent, catName: string) => {
+    e.preventDefault()
+    if (draggedCategory && draggedCategory !== catName) {
+      setDragOverCategory(catName)
+    }
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setDragOverCategory(null)
+  }
+
+  const handleDrop = async (e: React.DragEvent, targetName: string) => {
+    e.preventDefault()
+    setDragOverCategory(null)
+    const sourceName = e.dataTransfer.getData('text/plain')
+    if (sourceName && sourceName !== targetName) {
+      const oldIndex = categories.findIndex(c => c.name === sourceName)
+      const newIndex = categories.findIndex(c => c.name === targetName)
+      
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newCategories = [...categories]
+        const [moved] = newCategories.splice(oldIndex, 1)
+        newCategories.splice(newIndex, 0, moved)
+        setCategories(newCategories)
+        
+        try {
+          await window.api.reorderCategories(extensionPath, newCategories.map(c => c.name))
+          onChanged()
+        } catch (err) {
+          setError((err as Error).message)
+          loadCategories() // Revert on failure
+        }
+      }
+    }
+    setDraggedCategory(null)
   }
 
   useEffect(() => { loadCategories() }, [extensionPath])
@@ -284,16 +329,42 @@ export default function CategoryManager({
             categories.map((cat, index) => (
               <div
                 key={cat.name}
+                draggable
+                onDragStart={(e) => handleDragStart(e, cat.name)}
+                onDragOver={(e) => handleDragOver(e, cat.name)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, cat.name)}
+                onDragEnd={() => { setDraggedCategory(null); setDragOverCategory(null); }}
                 style={{
                   display: 'flex', alignItems: 'center',
                   padding: '0 20px',
                   borderBottom: index < categories.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                  borderTop: dragOverCategory === cat.name ? '2px solid #4f8eff' : 'none', // Drop indicator
                   minHeight: 48,
                   transition: 'background 0.12s',
+                  background: draggedCategory === cat.name ? 'rgba(255,255,255,0.05)' : 'transparent',
+                  opacity: draggedCategory === cat.name ? 0.5 : 1,
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.025)' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                onMouseEnter={e => { if (draggedCategory !== cat.name) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.025)' }}
+                onMouseLeave={e => { if (draggedCategory !== cat.name) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
               >
+                {/* Drag Handle */}
+                <div
+                  style={{
+                    marginRight: 12, cursor: 'grab', color: '#55556a',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="9" cy="5" r="1.5" />
+                    <circle cx="15" cy="5" r="1.5" />
+                    <circle cx="9" cy="12" r="1.5" />
+                    <circle cx="15" cy="12" r="1.5" />
+                    <circle cx="9" cy="19" r="1.5" />
+                    <circle cx="15" cy="19" r="1.5" />
+                  </svg>
+                </div>
+
                 {editingCategory === cat.name ? (
                   /* ── Edit mode ── */
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '8px 0' }}>

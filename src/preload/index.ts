@@ -51,6 +51,8 @@ const api = {
     action: 'move' | 'delete',
     targetCategory?: string
   ) => ipcRenderer.invoke('categories:delete', extensionPath, name, action, targetCategory),
+  reorderCategories: (extensionPath: string, newOrder: string[]) =>
+    ipcRenderer.invoke('categories:reorder', extensionPath, newOrder),
 
   // Validation
   validatePresets: (extensionPath: string) =>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 interface AddPresetModalProps {
   categories: string[]
+  presets: any[] // Pass presets to check for existing names
   extensionPath: string
   onClose: () => void
   onAdded: () => void
@@ -43,7 +44,7 @@ function FilePickerRow({ label, value, type, onSelect }: {
 }
 
 export default function AddPresetModal({
-  categories, extensionPath, onClose, onAdded,
+  categories, presets, extensionPath, onClose, onAdded,
 }: AddPresetModalProps) {
   const [name, setName] = useState('')
   const [idPreview, setIdPreview] = useState('')
@@ -53,18 +54,45 @@ export default function AddPresetModal({
   const [thumbnailPath, setThumbnailPath] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!name.trim()) { setIdPreview(''); return }
-    window.api.generateId(name).then((id: string) => setIdPreview(id))
-  }, [name])
+    if (!name.trim()) {
+      setIdPreview('')
+      setWarning(null)
+      return
+    }
+    window.api.generateId(name).then((id: string) => {
+      setIdPreview(id)
+      if (presets.some((p) => p.id === id)) {
+        setWarning(`A preset with system ID "${id}" already exists.`)
+      } else {
+        setWarning(null)
+      }
+    })
+  }, [name, presets])
+
+  // Helper to extract base name from path without extension
+  const getBaseName = (filePath: string) => {
+    const parts = filePath.split(/[/\\]/) // Handle both Windows and Mac separators
+    const fileName = parts[parts.length - 1]
+    const extIdx = fileName.lastIndexOf('.')
+    if (extIdx > 0) return fileName.substring(0, extIdx)
+    return fileName
+  }
 
   const handleSelectFile = async (type: 'ffx' | 'preview' | 'thumbnail') => {
     try {
       const path = await window.api.selectFile(type)
       if (path) {
-        if (type === 'ffx') setFfxPath(path)
-        if (type === 'preview') setPreviewPath(path)
+        if (type === 'ffx') {
+          setFfxPath(path)
+          if (!name.trim()) setName(getBaseName(path))
+        }
+        if (type === 'preview') {
+          setPreviewPath(path)
+          if (!name.trim()) setName(getBaseName(path))
+        }
         if (type === 'thumbnail') setThumbnailPath(path)
       }
     } catch (err) { console.error(err) }
@@ -133,6 +161,14 @@ export default function AddPresetModal({
               color: '#ff5f5f', padding: '8px 12px', borderRadius: 6, fontSize: 12, marginBottom: 14,
             }}>
               {error}
+            </div>
+          )}
+          {warning && (
+            <div style={{
+              background: 'rgba(255,180,95,0.08)', border: '1px solid rgba(255,180,95,0.2)',
+              color: '#ffb45f', padding: '8px 12px', borderRadius: 6, fontSize: 12, marginBottom: 14,
+            }}>
+              Warning: {warning}
             </div>
           )}
 
@@ -220,10 +256,10 @@ export default function AddPresetModal({
           }}>
             Cancel
           </button>
-          <button type="submit" disabled={isSubmitting || !name.trim()} style={{
-            height: 32, padding: '0 16px', borderRadius: 6, cursor: (isSubmitting || !name.trim()) ? 'not-allowed' : 'pointer',
+          <button type="submit" disabled={isSubmitting || !name.trim() || !!warning} style={{
+            height: 32, padding: '0 16px', borderRadius: 6, cursor: (isSubmitting || !name.trim() || !!warning) ? 'not-allowed' : 'pointer',
             background: '#4f8eff', border: 'none', color: '#fff', fontSize: 12, fontWeight: 600,
-            opacity: (isSubmitting || !name.trim()) ? 0.5 : 1,
+            opacity: (isSubmitting || !name.trim() || !!warning) ? 0.5 : 1,
           }}>
             {isSubmitting ? 'Creating…' : 'Create Preset'}
           </button>

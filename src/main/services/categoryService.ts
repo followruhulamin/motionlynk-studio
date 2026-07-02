@@ -139,4 +139,27 @@ export function registerCategoryHandlers(): void {
       return { success: true }
     }
   )
+
+  /**
+   * Reorder categories by providing a new ordered list of category names.
+   */
+  ipcMain.handle(
+    'categories:reorder',
+    (_event, extensionPath: string, newOrder: string[]) => {
+      const manifest = readPresetsJson(extensionPath)
+
+      // Validate that the new order contains exactly the same categories
+      const currentCategories = manifest.categories
+      if (
+        currentCategories.length !== newOrder.length ||
+        !currentCategories.every((cat) => newOrder.includes(cat))
+      ) {
+        throw new Error('New category order must contain the exact same categories as the current list.')
+      }
+
+      manifest.categories = newOrder
+      writePresetsJson(extensionPath, manifest)
+      return { success: true }
+    }
+  )
 }

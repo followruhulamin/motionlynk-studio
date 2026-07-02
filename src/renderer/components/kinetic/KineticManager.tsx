@@ -267,7 +267,7 @@ export default function KineticManager({
 
       {/* Modals */}
       {showAddModal && (
-        <AddPresetModal categories={categories} extensionPath={extensionPath}
+        <AddPresetModal categories={categories} presets={presets} extensionPath={extensionPath}
           onClose={() => setShowAddModal(false)}
           onAdded={() => { loadData(); showToast('Preset added successfully', 'success') }}
         />

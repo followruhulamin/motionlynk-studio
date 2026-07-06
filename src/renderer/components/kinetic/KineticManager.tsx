@@ -12,8 +12,6 @@ import Toast from '../shared/Toast'
 interface KineticManagerProps {
   extensionPath: string
   onExtensionPathChange: (newPath: string) => void
-  onRefresh: () => void
-  onGoToExtension: () => void
 }
 
 export interface PresetData {
@@ -32,8 +30,6 @@ export interface PresetData {
 
 export default function KineticManager({
   extensionPath,
-  onRefresh,
-  onGoToExtension,
 }: KineticManagerProps) {
   const [presets, setPresets] = useState<PresetData[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -142,58 +138,9 @@ export default function KineticManager({
     }
   }
 
-  // ── No folder selected — show setup screen ──────────────────────────────
+  // ── No folder selected ──────────────────────────────
   if (!extensionPath) {
-    return (
-      <div style={{
-        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        flexDirection: 'column', gap: 20, padding: 40, height: '100%',
-      }}>
-        <div style={{
-          width: 72, height: 72, borderRadius: 20,
-          background: 'rgba(79,142,255,0.1)', border: '1px solid rgba(79,142,255,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg style={{ width: 32, height: 32, color: '#4f8eff' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-            <line x1="12" y1="11" x2="12" y2="17" /><line x1="9" y1="14" x2="15" y2="14" />
-          </svg>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#dddde9', marginBottom: 8 }}>
-            No Extension Connected
-          </h2>
-          <p style={{ fontSize: 13, color: '#8e8ea8', maxWidth: 320, lineHeight: 1.6 }}>
-            Go to <strong style={{ color: '#dddde9' }}>Extension Settings</strong> in the sidebar
-            to connect your MotionLynk extension folder.
-          </p>
-        </div>
-        <button
-          onClick={onGoToExtension}
-          style={{
-            height: 40, padding: '0 24px', borderRadius: 10,
-            background: 'linear-gradient(135deg, #4f8eff, #3a7aff)',
-            border: 'none', color: '#fff', fontSize: 13, fontWeight: 600,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
-            boxShadow: '0 4px 20px rgba(79,142,255,0.35)', transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'
-            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 8px 28px rgba(79,142,255,0.45)'
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 4px 20px rgba(79,142,255,0.35)'
-          }}
-        >
-          <svg style={{ width: 14, height: 14 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
-          </svg>
-          Open Extension Settings
-        </button>
-      </div>
-    )
+    return null
   }
 
   // ── Main Kinetic UI ──────────────────────────────────────────────────────
@@ -252,17 +199,35 @@ export default function KineticManager({
         />
       </div>
 
-      {/* Inspector */}
-      {selectedPreset && (
+      {/* Inspector (Always Visible) */}
+      {selectedPreset ? (
         <PresetInspector
           preset={selectedPreset}
           categories={categories}
           extensionPath={extensionPath}
           onUpdate={handleUpdatePreset}
           onDelete={handleDeletePreset}
-          onClose={() => setSelectedPreset(null)}
           onRefresh={loadData}
         />
+      ) : (
+        <div style={{
+          width: 296, flexShrink: 0, display: 'flex', flexDirection: 'column',
+          height: '100%', overflow: 'hidden', borderLeft: '1px solid rgba(255,255,255,0.07)',
+          background: '#12121a'
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '11px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0
+          }}>
+            <span style={{
+              fontSize: 9, fontWeight: 700, textTransform: 'uppercase',
+              letterSpacing: '0.1em', color: '#55556a'
+            }}>Inspector</span>
+          </div>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#55556a', fontSize: 11 }}>
+            No preset selected
+          </div>
+        </div>
       )}
 
       {/* Modals */}

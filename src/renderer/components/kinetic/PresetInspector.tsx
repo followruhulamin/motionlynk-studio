@@ -7,7 +7,7 @@ interface PresetInspectorProps {
   extensionPath: string
   onUpdate: (oldId: string, changes: any) => Promise<void>
   onDelete: (id: string) => Promise<void>
-  onClose: () => void
+  onClose?: () => void
   onRefresh: () => void
 }
 
@@ -154,16 +154,6 @@ export default function PresetInspector({
       {/* Header */}
       <div style={S.panelHeader}>
         <span style={S.panelTitle}>Inspector</span>
-        <button
-          onClick={onClose}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#55556a', padding: 2, display: 'flex', alignItems: 'center', borderRadius: 4 }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#8e8ea8' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#55556a' }}
-        >
-          <svg style={{ width: 14, height: 14 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
 
       {/* Scroll area */}

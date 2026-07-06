@@ -65,6 +65,20 @@ const api = {
     ipcRenderer.invoke('extension:setVersion', extensionPath, newVersion),
   setModuleVersion: (extensionPath: string, moduleId: string, newVersion: string) =>
     ipcRenderer.invoke('extension:setModuleVersion', extensionPath, moduleId, newVersion),
+
+  // Expo
+  getExpoLibrary: (extensionPath: string) =>
+    ipcRenderer.invoke('expo:getLibrary', extensionPath),
+  saveExpoLibrary: (extensionPath: string, data: any) =>
+    ipcRenderer.invoke('expo:saveLibrary', extensionPath, data),
+  saveExpoExpression: (extensionPath: string, expression: any, previewSourcePath?: string) =>
+    ipcRenderer.invoke('expo:saveExpression', extensionPath, expression, previewSourcePath),
+  deleteExpoExpression: (extensionPath: string, id: string) =>
+    ipcRenderer.invoke('expo:deleteExpression', extensionPath, id),
+  selectExpoFile: () =>
+    ipcRenderer.invoke('expo:selectFile'),
+  validateExpoLibrary: (extensionPath: string) =>
+    ipcRenderer.invoke('expo:validate', extensionPath),
 }
 
 if (process.contextIsolated) {

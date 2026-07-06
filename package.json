@@ -1,5 +1,6 @@
 {
   "name": "motionlynk-studio",
+  "productName": "MotionLynk Studio",
   "version": "1.0.0",
   "description": "Internal content management system for MotionLynk",
   "main": "./out/main/index.js",

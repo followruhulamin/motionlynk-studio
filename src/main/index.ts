@@ -6,6 +6,9 @@ import { registerCategoryHandlers } from './services/categoryService'
 import { registerValidationHandlers } from './services/validationService'
 import { registerFileHandlers } from './services/fileService'
 import { registerExtensionHandlers } from './services/extensionService'
+import { registerExpoHandlers } from './services/expoService'
+
+import icon from '../../resources/icon.png?asset'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -17,6 +20,7 @@ function createWindow(): void {
     backgroundColor: '#0d0d11',
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 12, y: 10 },
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -40,6 +44,11 @@ function createWindow(): void {
   }
 }
 
+app.setName('MotionLynk Studio')
+if (process.platform === 'darwin') {
+  app.dock.setIcon(icon)
+}
+
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.motionlynk.studio')
 
@@ -53,6 +62,7 @@ app.whenReady().then(() => {
   registerCategoryHandlers()
   registerValidationHandlers()
   registerExtensionHandlers()
+  registerExpoHandlers()
 
   // Extension path selector
   ipcMain.handle('dialog:selectFolder', async () => {

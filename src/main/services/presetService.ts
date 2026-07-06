@@ -121,8 +121,8 @@ export function registerPresetHandlers(): void {
         copyFile(data.thumbnailSourcePath, path.join(presetsDir, 'thumbnails', id + ext))
       }
 
-      // Append to manifest
-      manifest.presets.push({
+      // Prepend to manifest so new presets show first
+      manifest.presets.unshift({
         id,
         name: data.name,
         category: data.categories && data.categories.length > 0 ? data.categories[0] : data.category,

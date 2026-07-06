@@ -58,6 +58,14 @@ interface StudioAPI {
     bundleName: string
     modules: { id: string; name: string; version: string }[]
   }>
+
+  // Expo
+  getExpoLibrary: (extensionPath: string) => Promise<{ categories: string[]; expressions: any[] }>
+  saveExpoLibrary: (extensionPath: string, data: any) => Promise<boolean>
+  saveExpoExpression: (extensionPath: string, expression: any, previewSourcePath?: string) => Promise<boolean>
+  deleteExpoExpression: (extensionPath: string, id: string) => Promise<boolean>
+  selectExpoFile: () => Promise<string | null>
+  validateExpoLibrary: (extensionPath: string) => Promise<any>
 }
 
 interface PresetWithStatus {

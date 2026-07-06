@@ -15,6 +15,7 @@ interface ExtensionInfo {
 
 interface ExtensionManagerProps {
   extensionPath: string
+  onExtensionPathChange?: (newPath: string) => void
 }
 
 interface ModuleVersionEditorProps {
@@ -168,7 +169,7 @@ function ModuleVersionEditor({
   )
 }
 
-export default function ExtensionManager({ extensionPath }: ExtensionManagerProps) {
+export default function ExtensionManager({ extensionPath, onExtensionPathChange }: ExtensionManagerProps) {
   const [info, setInfo] = useState<ExtensionInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -224,9 +225,35 @@ export default function ExtensionManager({ extensionPath }: ExtensionManagerProp
         <svg style={{ width: 40, height: 40, opacity: 0.25 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
         </svg>
-        <p style={{ fontSize: 13, textAlign: 'center' }}>
-          Connect an extension folder first (via Kinetic settings).
+        <p style={{ fontSize: 13, textAlign: 'center', marginBottom: 12 }}>
+          Connect an extension folder first.
         </p>
+        <button
+          onClick={async () => {
+            if (onExtensionPathChange) {
+              try {
+                const result = await window.api.selectFolder()
+                if (result) onExtensionPathChange(result)
+              } catch (err) {
+                console.error('Failed to select folder:', err)
+              }
+            }
+          }}
+          style={{
+            height: 36, padding: '0 20px', borderRadius: 8,
+            background: 'linear-gradient(135deg, #4f8eff, #3a7aff)',
+            border: 'none', color: '#fff', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+            boxShadow: '0 4px 12px rgba(79,142,255,0.3)', transition: 'all 0.2s',
+          }}
+        >
+          <svg style={{ width: 14, height: 14 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          Select Extension Folder
+        </button>
       </div>
     )
   }

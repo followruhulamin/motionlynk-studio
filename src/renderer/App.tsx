@@ -1,14 +1,17 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from './components/layout/Sidebar'
 import Header from './components/layout/Header'
 import KineticManager from './components/kinetic/KineticManager'
 import ExtensionManager from './components/extension/ExtensionManager'
+import ExpoManager from './components/expo/ExpoManager'
 
 export default function App() {
   const [extensionPath, setExtensionPath] = useState<string>(
     () => localStorage.getItem('extensionPath') || ''
   )
-  const [activeModule, setActiveModule] = useState<string>('kinetic')
+  const [activeModule, setActiveModule] = useState<string>(() => {
+    return localStorage.getItem('extensionPath') ? 'kinetic' : 'extension'
+  })
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -17,12 +20,12 @@ export default function App() {
     }
   }, [extensionPath])
 
-  const triggerRefresh = useCallback(() => {
-    setRefreshKey((k) => k + 1)
-  }, [])
 
   const handlePathChange = (newPath: string) => {
     setExtensionPath(newPath)
+    if (!newPath) {
+      setActiveModule('extension')
+    }
     setRefreshKey((k) => k + 1)
   }
 
@@ -30,18 +33,27 @@ export default function App() {
     <div className="app-shell">
       <Header />
       <div className="app-body">
-        <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
+        <Sidebar 
+          activeModule={activeModule} 
+          onModuleChange={setActiveModule} 
+          hasExtensionPath={!!extensionPath}
+        />
         <main className="app-main">
           {activeModule === 'kinetic' && (
             <KineticManager
               key={refreshKey}
               extensionPath={extensionPath}
               onExtensionPathChange={handlePathChange}
-              onRefresh={triggerRefresh}
             />
           )}
           {activeModule === 'extension' && (
             <ExtensionManager
+              extensionPath={extensionPath}
+              onExtensionPathChange={handlePathChange}
+            />
+          )}
+          {activeModule === 'expo' && (
+            <ExpoManager
               extensionPath={extensionPath}
             />
           )}

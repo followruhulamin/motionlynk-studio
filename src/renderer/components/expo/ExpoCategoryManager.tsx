@@ -26,6 +26,7 @@ export default function ExpoCategoryManager({
   // Add new
   const [newCatName, setNewCatName] = useState('')
   const [newCatColor, setNewCatColor] = useState(PRESET_COLORS[0])
+  const [pickerOpenCat, setPickerOpenCat] = useState<string | null>(null)
 
   const handleAdd = () => {
     if (!newCatName.trim()) return
@@ -54,6 +55,7 @@ export default function ExpoCategoryManager({
     setIsSaving(true)
     try {
       await onSave(categories, colors)
+      onClose() // Auto-close the dialog on success
     } catch (err) {
       console.error(err)
     } finally {
@@ -150,16 +152,46 @@ export default function ExpoCategoryManager({
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <div style={{ position: 'relative' }}>
-                      <input 
-                        type="color" 
-                        value={color}
-                        onChange={(e) => handleColorChange(cat, e.target.value)}
-                        style={{
-                          width: 20, height: 20, padding: 0, border: 'none', borderRadius: '50%',
-                          background: 'transparent', cursor: 'pointer', opacity: 0, position: 'absolute', inset: 0
+                      <button 
+                        onClick={() => setPickerOpenCat(pickerOpenCat === cat ? null : cat)}
+                        style={{ 
+                          width: 20, height: 20, padding: 0, border: '1px solid rgba(255,255,255,0.1)', 
+                          borderRadius: '50%', background: 'rgba(255,255,255,0.05)', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', outline: 'none'
                         }}
-                      />
-                      <div style={{ width: 14, height: 14, borderRadius: '50%', background: color, pointerEvents: 'none' }} />
+                      >
+                        <div style={{ width: 12, height: 12, borderRadius: '50%', background: color }} />
+                      </button>
+                      
+                      {pickerOpenCat === cat && (
+                        <>
+                          <div 
+                            onClick={() => setPickerOpenCat(null)}
+                            style={{ position: 'fixed', inset: 0, zIndex: 99999 }}
+                          />
+                          <div style={{
+                            position: 'absolute', top: 26, left: 0, zIndex: 100000,
+                            background: '#181824', border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: 8, padding: 10, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+                            gap: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.6)', width: 112
+                          }}>
+                            {PRESET_COLORS.map(presetColor => (
+                              <button
+                                key={presetColor}
+                                onClick={() => {
+                                  handleColorChange(cat, presetColor)
+                                  setPickerOpenCat(null)
+                                }}
+                                style={{
+                                  width: 18, height: 18, borderRadius: '50%', background: presetColor,
+                                  border: 'none', cursor: 'pointer', outline: 'none',
+                                  boxShadow: color === presetColor ? '0 0 0 2px #fff' : 'none'
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </>
+                      )}
                     </div>
                     <span style={{ color: '#dddde9', fontSize: 13, fontWeight: 500 }}>{cat}</span>
                   </div>

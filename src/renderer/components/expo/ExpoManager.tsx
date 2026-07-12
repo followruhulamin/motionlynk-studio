@@ -142,7 +142,7 @@ export default function ExpoManager({ extensionPath }: ExpoManagerProps) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
             {filtered.map(exp => {
               const isSelected = selectedExpression?.id === exp.id
-              const previewUrl = 'file://' + encodeURI(`${extensionPath}/modules/expo/starter/GIFs/${exp.id}.gif`.replace(/\\/g, '/')) + `?t=${globalCacheBuster}`
+              const previewUrl = 'file://' + encodeURI(`${extensionPath}/modules/expo/starter/previews/${exp.id}.mp4`.replace(/\\/g, '/')) + `?t=${globalCacheBuster}`
               
               return (
                 <div 
@@ -156,9 +156,12 @@ export default function ExpoManager({ extensionPath }: ExpoManagerProps) {
                   }}
                 >
                   <div style={{ width: '100%', paddingTop: '56.25%', position: 'relative', background: '#0a0a12' }}>
-                    <img 
+                    <video 
                       src={previewUrl} 
-                      alt="" 
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
                       onError={(e) => { e.currentTarget.style.display = 'none' }}
                       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
                     />

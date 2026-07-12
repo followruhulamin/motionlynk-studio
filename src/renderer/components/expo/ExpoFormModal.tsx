@@ -76,7 +76,7 @@ export default function ExpoFormModal({ categories, allTags, initialData, onClos
 
           <div>
             <label style={{ display: 'block', fontSize: 11, color: '#8e8ea8', marginBottom: 6 }}>Description</label>
-            <input type="text" value={description} onChange={e => setDescription(e.target.value)} maxLength={100} placeholder="Short description (max 100 chars)" style={{
+            <input type="text" value={description} onChange={e => setDescription(e.target.value)} maxLength={200} placeholder="Short description (max 200 chars)" style={{
               width: '100%', height: 34, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 6, color: '#fff', padding: '0 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box'
             }} />
@@ -122,9 +122,9 @@ export default function ExpoFormModal({ categories, allTags, initialData, onClos
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: 11, color: '#8e8ea8', marginBottom: 6 }}>Preview Image (optional, ideal size: 160x90)</label>
+            <label style={{ display: 'block', fontSize: 11, color: '#8e8ea8', marginBottom: 6 }}>Preview Video (optional, MP4 format, ideal size: 160x90)</label>
             <div style={{ display: 'flex', gap: 8 }}>
-              <input type="text" readOnly value={previewPath || initialData?.preview || ''} placeholder="Path to image" style={{
+              <input type="text" readOnly value={previewPath || initialData?.preview || ''} placeholder="Path to MP4 video" style={{
                 flex: 1, height: 34, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
                 borderRadius: 6, color: '#fff', padding: '0 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box'
               }} />

@@ -109,6 +109,7 @@ export default function ExpoInspector({
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [cacheBuster, setCacheBuster] = useState(Date.now())
+  const [videoError, setVideoError] = useState(false)
 
   useEffect(() => {
     setName(expression.name)
@@ -118,7 +119,12 @@ export default function ExpoInspector({
     setSelectedCategories(expression.categories || [expression.category])
     setCode(expression.expression || expression.code || '')
     setCacheBuster(Date.now())
+    setVideoError(false)
   }, [expression])
+
+  useEffect(() => {
+    setVideoError(false)
+  }, [cacheBuster])
 
   const areArraysEqual = (a: string[], b: string[]) => {
     if (a.length !== b.length) return false
@@ -137,8 +143,8 @@ export default function ExpoInspector({
     code !== (expression.expression || expression.code || '') ||
     !areArraysEqual(selectedCategories, originalCategories)
 
-  // Try to load the GIF by expression ID.
-  const previewSrc = 'file://' + encodeURI(`${extensionPath}/modules/expo/starter/GIFs/${expression.id}.gif`.replace(/\\/g, '/')) + `?t=${cacheBuster}`
+  // Try to load the MP4 by expression ID.
+  const previewSrc = 'file://' + encodeURI(`${extensionPath}/modules/expo/starter/previews/${expression.id}.mp4`.replace(/\\/g, '/')) + `?t=${cacheBuster}`
 
   const handleSave = async () => {
     if (!name.trim() || !code.trim()) return
@@ -184,7 +190,11 @@ export default function ExpoInspector({
       }
       
       await onUpdate(updatedExpression, selectedPath)
-      setCacheBuster(Date.now())
+      
+      // Minor delay to ensure OS file system write is finalized before we bust the cache
+      setTimeout(() => {
+        setCacheBuster(Date.now())
+      }, 200)
     } catch (err) {
       console.error(err)
     } finally {
@@ -217,11 +227,15 @@ export default function ExpoInspector({
             background: '#0a0a12', borderRadius: 7, overflow: 'hidden',
             border: '1px solid rgba(255,255,255,0.05)',
           }}>
-            {previewSrc ? (
-              <img
+            {previewSrc && !videoError ? (
+              <video
                 key={previewSrc}
                 src={previewSrc}
-                onError={(e) => { e.currentTarget.style.display = 'none' }}
+                autoPlay
+                loop
+                muted
+                playsInline
+                onError={() => setVideoError(true)}
                 style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
@@ -265,7 +279,7 @@ export default function ExpoInspector({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={2}
-            maxLength={50}
+            maxLength={200}
             style={{...S.textarea, fontFamily: 'inherit'}}
             onBlur={handleSave}
             onFocus={e => { (e.target as HTMLElement).style.borderColor = 'rgba(218, 85, 151, 0.5)' }}
@@ -358,8 +372,8 @@ export default function ExpoInspector({
         <div style={S.section}>
           <label style={S.label}>Asset Pipeline</label>
           <FileRow 
-            label="GIF Preview" 
-            filename={`${expression.id}.gif`} 
+            label="Video Preview" 
+            filename={`${expression.id}.mp4`} 
             hasFile={true} 
             onUpload={handleUploadPreview} 
             disabled={isSaving} 

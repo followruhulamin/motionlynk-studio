@@ -357,7 +357,7 @@ export default function ExpoHealthDashboard({ extensionPath, onClose }: ExpoHeal
               {activeTab === 'missing' && (
                 <div>
                   {result.missingPreviews.length === 0 ? (
-                    <div style={{ color: '#8e8ea8', fontSize: 13, textAlign: 'center', padding: '40px 0' }}>All GIFs are present.</div>
+                    <div style={{ color: '#8e8ea8', fontSize: 13, textAlign: 'center', padding: '40px 0' }}>All MP4s are present.</div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                       {result.missingPreviews.map(id => (
@@ -369,10 +369,10 @@ export default function ExpoHealthDashboard({ extensionPath, onClose }: ExpoHeal
                           <div style={{
                             padding: '4px 8px', background: 'rgba(255,95,95,0.1)',
                             color: '#ff5f5f', borderRadius: 4, fontSize: 10, fontWeight: 700,
-                          }}>GIF</div>
+                          }}>MP4</div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 13, color: '#dddde9', fontWeight: 500 }}>{id}</div>
-                            <div style={{ fontSize: 11, color: '#55556a', fontFamily: 'monospace' }}>Missing {id}.gif</div>
+                            <div style={{ fontSize: 11, color: '#55556a', fontFamily: 'monospace' }}>Missing {id}.mp4</div>
                           </div>
                         </div>
                       ))}
@@ -397,10 +397,10 @@ export default function ExpoHealthDashboard({ extensionPath, onClose }: ExpoHeal
                           <div style={{
                             padding: '4px 8px', background: 'rgba(245,166,35,0.1)',
                             color: '#f5a623', borderRadius: 4, fontSize: 10, fontWeight: 700,
-                          }}>GIFs</div>
+                          }}>previews</div>
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontSize: 13, color: '#dddde9', fontWeight: 500 }}>{f.file}</div>
-                            <div style={{ fontSize: 11, color: '#55556a' }}>This GIF is in the GIFs folder but not linked to any expression.</div>
+                            <div style={{ fontSize: 11, color: '#55556a' }}>This MP4 is in the previews folder but not linked to any expression.</div>
                           </div>
                         </div>
                       ))}

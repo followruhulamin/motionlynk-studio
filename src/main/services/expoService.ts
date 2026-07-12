@@ -38,7 +38,7 @@ export function registerExpoHandlers(): void {
   ipcMain.handle('expo:saveExpression', async (_, extensionPath: string, expression: any, previewSourcePath?: string) => {
     try {
       const starterPath = join(extensionPath, 'modules', 'expo', 'starter')
-      const previewsPath = join(starterPath, 'GIFs')
+      const previewsPath = join(starterPath, 'previews')
       const dbPath = join(starterPath, 'expo_library.json')
 
       if (!fs.existsSync(previewsPath)) {
@@ -47,7 +47,7 @@ export function registerExpoHandlers(): void {
 
       // Handle media copy
       if (previewSourcePath && fs.existsSync(previewSourcePath)) {
-        const dest = join(previewsPath, `${expression.id}.gif`)
+        const dest = join(previewsPath, `${expression.id}.mp4`)
         fs.copyFileSync(previewSourcePath, dest)
       }
 
@@ -83,7 +83,7 @@ export function registerExpoHandlers(): void {
     try {
       const starterPath = join(extensionPath, 'modules', 'expo', 'starter')
       const dbPath = join(starterPath, 'expo_library.json')
-      const previewPath = join(starterPath, 'GIFs', `${id}.gif`)
+      const previewPath = join(starterPath, 'previews', `${id}.mp4`)
 
       if (fs.existsSync(previewPath)) {
         fs.unlinkSync(previewPath)
@@ -101,11 +101,11 @@ export function registerExpoHandlers(): void {
     }
   })
 
-  // Select a preview file (GIF)
+  // Select a preview file (MP4)
   ipcMain.handle('expo:selectFile', async () => {
     const result = await dialog.showOpenDialog({
       properties: ['openFile'],
-      filters: [{ name: 'GIF Image', extensions: ['gif'] }]
+      filters: [{ name: 'MP4 Video', extensions: ['mp4'] }]
     })
     if (result.canceled) return null
     return result.filePaths[0]
@@ -115,7 +115,7 @@ export function registerExpoHandlers(): void {
   ipcMain.handle('expo:validate', async (_, extensionPath: string) => {
     const starterPath = join(extensionPath, 'modules', 'expo', 'starter')
     const dbPath = join(starterPath, 'expo_library.json')
-    const previewsPath = join(starterPath, 'GIFs')
+    const previewsPath = join(starterPath, 'previews')
     
     let db = { categories: [] as string[], expressions: [] as any[] }
     let lastModified = null
@@ -143,7 +143,7 @@ export function registerExpoHandlers(): void {
     }
 
     for (const exp of db.expressions) {
-      const previewFile = join(previewsPath, `${exp.id}.gif`)
+      const previewFile = join(previewsPath, `${exp.id}.mp4`)
       if (!fs.existsSync(previewFile)) {
         missingPreviews.push(exp.id)
       }
@@ -165,10 +165,10 @@ export function registerExpoHandlers(): void {
     if (fs.existsSync(previewsPath)) {
       const files = fs.readdirSync(previewsPath)
       for (const file of files) {
-        if (file.endsWith('.gif')) {
-          const id = file.replace('.gif', '')
+        if (file.endsWith('.mp4')) {
+          const id = file.replace('.mp4', '')
           if (!expIds.has(id)) {
-            orphanedFiles.push({ dir: 'GIFs', file })
+            orphanedFiles.push({ dir: 'previews', file })
           }
         }
       }

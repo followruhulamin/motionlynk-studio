@@ -1,3 +1,5 @@
+import { JSX } from "react/jsx-runtime"
+
 interface SidebarProps {
   activeModule: string
   onModuleChange: (id: string) => void
@@ -46,6 +48,16 @@ const modules = [
         <line stroke="#6466e9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="9.64" x1="55.95" y1="116.52" x2="144.05" y2="116.52" />
         <line stroke="#6466e9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="9.64" x1="88.99" y1="50.45" x2="77.98" y2="149.55" />
         <line stroke="#6466e9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="9.64" x1="122.02" y1="50.45" x2="111.01" y2="149.55" />
+      </svg>
+    )
+  },
+  {
+    id: 'spark', name: 'Spark', enabled: false,
+    icon: (
+      <svg style={{ width: 14, height: 14 }} viewBox="0 0 200 200" fill="none">
+        <path stroke="#0ea5e9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="9" d="M113.5,51.5l-35,60h31l-24,37" />
+        <path stroke="#0ea5e9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="9" d="M85.5,100h-20" />
+        <path stroke="#0ea5e9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="9" d="M134.5,100h-20" />
       </svg>
     )
   },
@@ -126,13 +138,13 @@ function NavButton({
       onMouseEnter={e => {
         if (!isActive && mod.enabled) {
           (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'
-          ;(e.currentTarget as HTMLElement).style.color = '#c5c5d9'
+            ; (e.currentTarget as HTMLElement).style.color = '#c5c5d9'
         }
       }}
       onMouseLeave={e => {
         if (!isActive && mod.enabled) {
           (e.currentTarget as HTMLElement).style.background = 'transparent'
-          ;(e.currentTarget as HTMLElement).style.color = '#8e8ea8'
+            ; (e.currentTarget as HTMLElement).style.color = '#8e8ea8'
         }
       }}
     >
@@ -168,7 +180,7 @@ export default function Sidebar({ activeModule, onModuleChange, hasExtensionPath
         </span>
       </div>
 
-      <div className="app-sidebar-scroll" style={{ padding: '4px 6px', flex: 1, minHeight: 0, overflowY: 'auto' }}>
+      <div className="app-sidebar-scroll" style={{ padding: '4px 6px' }}>
         {modules.map((mod) => (
           <NavButton
             key={mod.id}

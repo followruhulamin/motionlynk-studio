@@ -196,6 +196,11 @@ export default function ExtensionManager({ extensionPath, onExtensionPathChange 
 
   useEffect(() => { loadInfo() }, [extensionPath])
 
+  // Keep editingVersion in sync whenever info.version changes (e.g. after a successful save)
+  useEffect(() => {
+    if (info?.version) setEditingVersion(info.version)
+  }, [info?.version])
+
   const handleSaveVersion = async () => {
     if (!editingVersion.trim() || !info) return
     setSaveError(null)
@@ -203,7 +208,9 @@ export default function ExtensionManager({ extensionPath, onExtensionPathChange 
     setIsSaving(true)
     try {
       const updated = await window.api.setExtensionVersion(extensionPath, editingVersion.trim())
+      // Explicitly re-read and update both info and editingVersion so badge + input always reflect saved state
       setInfo(updated)
+      setEditingVersion(updated.version)
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
@@ -261,7 +268,8 @@ export default function ExtensionManager({ extensionPath, onExtensionPathChange 
   return (
     <div style={{
       flex: 1, minHeight: 0, overflowY: 'auto',
-      padding: 24, display: 'flex', flexDirection: 'column', gap: 20,
+      padding: '24px 24px 60px 24px', display: 'flex', flexDirection: 'column', gap: 20,
+      boxSizing: 'border-box',
     }}>
       {/* Page header */}
       <div>
@@ -334,13 +342,76 @@ export default function ExtensionManager({ extensionPath, onExtensionPathChange 
               }}>
                 v{info.version}
               </div>
+              {/* Reload from disk */}
+              <button
+                onClick={loadInfo}
+                title="Reload info from disk"
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: '#55556a', padding: 4, borderRadius: 4,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'color 0.15s',
+                }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = '#8e8ea8'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = '#55556a'}
+              >
+                <svg style={{ width: 13, height: 13 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <polyline points="23 4 23 10 17 10" />
+                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+                </svg>
+              </button>
             </div>
 
             {/* Identity fields */}
             <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
               <Row label="Bundle ID" value={info.bundleId} mono />
               <Row label="Bundle Name" value={info.bundleName} />
-              <Row label="Extension Path" value={extensionPath} mono small />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <span style={{ fontSize: 11, color: '#55556a', flexShrink: 0 }}>Extension Path</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden', minWidth: 0 }}>
+                  <span style={{
+                    fontSize: 10, fontFamily: 'monospace', color: '#8e8ea8',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                    direction: 'rtl', textAlign: 'right',
+                  }} title={extensionPath}>
+                    {extensionPath}
+                  </span>
+                  <button
+                    onClick={async () => {
+                      if (onExtensionPathChange) {
+                        try {
+                          const result = await window.api.selectFolder()
+                          if (result) onExtensionPathChange(result)
+                        } catch (err) {
+                          console.error('Failed to select folder:', err)
+                        }
+                      }
+                    }}
+                    title="Relink extension folder"
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 5,
+                      padding: '4px 10px', borderRadius: 6,
+                      background: 'rgba(79,142,255,0.1)',
+                      border: '1px solid rgba(79,142,255,0.25)',
+                      color: '#4f8eff', fontSize: 11, fontWeight: 600,
+                      cursor: 'pointer', flexShrink: 0, transition: 'all 0.15s',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(79,142,255,0.2)'
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLElement).style.background = 'rgba(79,142,255,0.1)'
+                    }}
+                  >
+                    <svg style={{ width: 12, height: 12 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    Relink Folder
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

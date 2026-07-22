@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerPresetHandlers } from './services/presetService'
 import { registerCategoryHandlers } from './services/categoryService'
@@ -8,9 +9,20 @@ import { registerFileHandlers } from './services/fileService'
 import { registerExtensionHandlers } from './services/extensionService'
 import { registerExpoHandlers } from './services/expoService'
 
-import icon from '../../resources/icon.png?asset'
+// Resolve icon path correctly for both dev and production.
+// In production, process.resourcesPath points to Contents/Resources (outside app.asar).
+// In dev, fall back to the local resources/ folder.
+function resolveIcon(): string | undefined {
+  if (is.dev) {
+    const devIcon = join(__dirname, '../../resources/icon.png')
+    return existsSync(devIcon) ? devIcon : undefined
+  }
+  const prodIcon = join(process.resourcesPath, 'resources', 'icon.png')
+  return existsSync(prodIcon) ? prodIcon : undefined
+}
 
 function createWindow(): void {
+  const resolvedIcon = resolveIcon()
   const mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -20,7 +32,7 @@ function createWindow(): void {
     backgroundColor: '#0d0d11',
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 12, y: 10 },
-    icon,
+    ...(resolvedIcon ? { icon: resolvedIcon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -46,7 +58,8 @@ function createWindow(): void {
 
 app.setName('MotionLynk Studio')
 if (process.platform === 'darwin') {
-  app.dock.setIcon(icon)
+  const dockIcon = resolveIcon()
+  if (dockIcon) app.dock.setIcon(dockIcon)
 }
 
 app.whenReady().then(() => {
